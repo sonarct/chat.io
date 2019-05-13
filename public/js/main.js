@@ -1,36 +1,41 @@
 const app = {
   rooms() {
-    const socket = io('/rooms', { transports: ['websocket'] });
+    const socket = window.io('/rooms', { transports: ['websocket'] });
 
     // When socket connects, get a list of chatrooms
     socket.on('connect', function() {
       // Update rooms list upon emitting updateRoomsList event
       socket.on('updateRoomsList', function(room) {
         // Display an error message upon a user error(i.e. creating a room with an existing title)
-        $('.room-create p.message').remove();
+        const msg = document.querySelector('.room-create p.message');
+        if (msg) {
+          msg.remove();
+        }
+
         if (room.error != null) {
-          $('.room-create').append(
-            `<p class="message error">${room.error}</p>`,
-          );
+          const roomCreate = document.querySelector('.room-create');
+          roomCreate.innerHTML += `<p class="message error">${room.error}</p>`;
         } else {
           app.helpers.updateRoomsList(room);
         }
       });
 
       // Whenever the user hits the create button, emit createRoom event.
-      $('.room-create button').on('click', function(e) {
-        const inputEle = $("input[name='title']");
-        const roomTitle = inputEle.val().trim();
+      const createRoomBtn = document.querySelector('.room-create button');
+
+      createRoomBtn.addEventListener('click', function() {
+        const input = document.querySelector("input[name='title']");
+        const roomTitle = input.value.trim();
         if (roomTitle !== '') {
           socket.emit('createRoom', roomTitle);
-          inputEle.val('');
+          input.value = '';
         }
       });
     });
   },
 
   chat(roomId, username) {
-    const socket = io('/chatroom', { transports: ['websocket'] });
+    const socket = window.io('/chatroom', { transports: ['websocket'] });
 
     // When socket connects, join the current chatroom
     socket.on('connect', function() {
@@ -38,19 +43,28 @@ const app = {
 
       // Update users list upon emitting updateUsersList event
       socket.on('updateUsersList', function(users, clear) {
-        $('.container p.message').remove();
-        if (users.error != null) {
-          $('.container').html(`<p class="message error">${users.error}</p>`);
+        const msg = document.querySelector('.container p.message');
+
+        if (msg) {
+          msg.remove();
+        }
+
+        if (users.error) {
+          const container = document.querySelector('.container');
+          container.innerHtml = `<p class="message error">${users.error}</p>`;
         } else {
           app.helpers.updateUsersList(users, clear);
         }
       });
 
       // Whenever the user hits the save button, emit newMessage event.
-      $('.chat-message button').on('click', function(e) {
-        const textareaEle = $("textarea[name='message']");
-        const messageContent = textareaEle.val().trim();
-        if (messageContent !== '') {
+      const chatMessageButton = document.querySelector('.chat-message button');
+
+      chatMessageButton.addEventListener('click', function() {
+        const textarea = document.querySelector("textarea[name='message']");
+        const messageContent = textarea.value.trim();
+
+        if (messageContent) {
           const message = {
             content: messageContent,
             username,
@@ -58,14 +72,15 @@ const app = {
           };
 
           socket.emit('newMessage', roomId, message);
-          textareaEle.val('');
+          textarea.value = '';
           app.helpers.addMessage(message);
         }
       });
 
       // Whenever a user leaves the current room, remove the user from users list
       socket.on('removeUser', function(userId) {
-        $(`li#user-${userId}`).remove();
+        const user = document.querySelector(`li#user-${userId}`);
+        user.remove();
         app.helpers.updateNumOfUsers();
       });
 
@@ -77,31 +92,19 @@ const app = {
   },
 
   helpers: {
-    encodeHTML(str) {
-      return $('<div />')
-        .text(str)
-        .html();
-    },
-
     // Update rooms list
     updateRoomsList(room) {
-      room.title = this.encodeHTML(room.title);
-      room.title =
-        room.title.length > 25 ? `${room.title.substr(0, 25)}...` : room.title;
       const html = `<a href="/chat/${room._id}"><li class="room-item">${
         room.title
       }</li></a>`;
 
-      if (html === '') {
-        return;
-      }
+      const roomsList = document.querySelector('.room-list ul');
+      const rooms = document.querySelectorAll('.room-list ul li');
 
-      if ($('.room-list ul li').length > 0) {
-        $('.room-list ul').prepend(html);
+      if (rooms.length > 0) {
+        roomsList.innerHTML += html;
       } else {
-        $('.room-list ul')
-          .html('')
-          .html(html);
+        roomsList.innerHTML = html;
       }
 
       this.updateNumOfRooms();
@@ -114,25 +117,27 @@ const app = {
       }
 
       let html = '';
+
       for (const user of users) {
-        user.username = this.encodeHTML(user.username);
-        html += `<li class="clearfix" id="user-${user._id}">
-                     <div class="about">
-                        <div class="name">${user.username}</div>
-                        <div class="status"><i class="fa fa-circle online"></i> online</div>
-                     </div></li>`;
+        html += ` <li class="clearfix" id="user-${user._id}">
+                    <div class="about">
+                      <div class="name">${user.username}</div>
+                      <div class="status">online</div>
+                    </div>
+                  </li>`;
       }
 
-      if (html === '') {
+      if (!html) {
         return;
       }
 
-      if (clear != null && clear == true) {
-        $('.users-list ul')
-          .html('')
-          .html(html);
+      const usersList = document.querySelector('.users-list ul');
+
+      if (clear) {
+        usersList.innerHTML = html;
       } else {
-        $('.users-list ul').prepend(html);
+        const temp = usersList.innerHTML;
+        usersList.innerHTML = html + temp;
       }
 
       this.updateNumOfUsers();
@@ -141,10 +146,8 @@ const app = {
     // Adding a new message to chat history
     addMessage(message) {
       message.date = new Date(message.date).toLocaleString();
-      message.username = this.encodeHTML(message.username);
-      message.content = this.encodeHTML(message.content);
 
-      const html = `<li>
+      const msg = `<li>
                     <div class="message-data">
                       <span class="message-data-name">${message.username}</span>
                       <span class="message-data-time">${message.date}</span>
@@ -153,30 +156,25 @@ const app = {
                       message.content
                     }</div>
                   </li>`;
-      $(html)
-        .hide()
-        .appendTo('.chat-history ul')
-        .slideDown(200);
 
-      // Keep scroll bar down
-      $('.chat-history').animate(
-        { scrollTop: $('.chat-history')[0].scrollHeight },
-        1000,
-      );
+      const chatHistory = document.querySelector('.chat-history ul');
+      chatHistory.innerHTML += msg;
     },
 
     // Update number of rooms
     // This method MUST be called after adding a new room
     updateNumOfRooms() {
-      const num = $('.room-list ul li').length;
-      $('.room-num-rooms').text(`${num} Room(s)`);
+      const roomsList = document.querySelectorAll('.room-list ul li');
+      const rooms = document.querySelector('.room-num-rooms');
+      rooms.innerText = `${roomsList.length} Room(s)`;
     },
 
     // Update number of online users in the current room
     // This method MUST be called after adding, or removing list element(s)
     updateNumOfUsers() {
-      const num = $('.users-list ul li').length;
-      $('.chat-num-users').text(`${num} User(s)`);
+      const usersList = document.querySelectorAll('.users-list ul li');
+      const users = document.querySelector('.chat-num-users');
+      users.innerText = `${usersList.length} User(s)`;
     },
   },
 };
