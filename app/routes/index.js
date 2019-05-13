@@ -15,9 +15,22 @@ router.get('/', function(req, res, next) {
     res.render('login', {
       success: req.flash('success')[0],
       errors: req.flash('error'),
-      showRegisterForm: req.flash('showRegisterForm')[0],
     });
   }
+});
+
+router.get('/login', (req, res, next) => {
+  res.render('login', {
+    success: req.flash('success')[0],
+    errors: req.flash('error'),
+  });
+});
+
+router.get('/register', (req, res, next) => {
+  res.render('register', {
+    success: req.flash('success')[0],
+    errors: req.flash('error'),
+  });
 });
 
 // Login
