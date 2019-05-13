@@ -5,6 +5,7 @@ const passport = require('passport');
 
 const User = require('../models/user');
 const Room = require('../models/room');
+const Message = require('../models/message');
 
 // Home page
 router.get('/', function(req, res, next) {
@@ -88,6 +89,7 @@ router.get('/rooms', [
   function(req, res, next) {
     Room.find(function(err, rooms) {
       if (err) throw err;
+
       res.render('rooms', { rooms });
     });
   },
@@ -98,12 +100,21 @@ router.get('/chat/:id', [
   User.isAuthenticated,
   function(req, res, next) {
     const roomId = req.params.id;
+
     Room.findById(roomId, function(err, room) {
       if (err) throw err;
+
       if (!room) {
         return next();
       }
-      res.render('chatroom', { user: req.user, room });
+
+      const params = {
+        room: roomId,
+      };
+
+      Message.find(params, function(err, messages) {
+        res.render('chatroom', { user: req.user, room, messages });
+      });
     });
   },
 ]);

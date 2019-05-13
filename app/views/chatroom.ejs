@@ -17,7 +17,21 @@
         <!-- end chat-header -->
 
         <div class="chat-history">
-          <ul></ul>
+          <ul>
+            <% messages.forEach(function(message) { %>
+            <li>
+              <div class="message-data">
+                <span class="message-data-name"><%= message.author %></span>
+                <span class="message-data-time"
+                  ><%= message.date.toUTCString() %></span
+                >
+              </div>
+              <div class="message my-message" dir="auto">
+                <%= message.content %>
+              </div>
+            </li>
+            <% }); %>
+          </ul>
         </div>
         <!-- end chat-history -->
 

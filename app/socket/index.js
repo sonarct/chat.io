@@ -110,7 +110,6 @@ const ioEvents = function(io) {
       // No need to emit 'addMessage' to the current socket
       // As the new message will be added manually in 'main.js' file
       // socket.emit('addMessage', message);
-      console.log('new message');
 
       const msg = {
         content: message.content,
@@ -118,9 +117,7 @@ const ioEvents = function(io) {
         author: message.username,
         date: new Date(message.date),
       };
-      console.log('msg', JSON.stringify(msg));
       Message.create(msg, () => {
-        console.log('new message created success');
         socket.broadcast.to(roomId).emit('addMessage', message);
       });
     });
@@ -140,9 +137,7 @@ const init = function(app) {
   io.set('transports', ['websocket']);
 
   // Using Redis
-  const { port } = config.redis;
-  const { host } = config.redis;
-  const { password } = config.redis;
+  const { port, host, password } = config.redis;
   const pubClient = redis(port, host, { auth_pass: password });
   const subClient = redis(port, host, {
     auth_pass: password,

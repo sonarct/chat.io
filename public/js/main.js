@@ -145,7 +145,7 @@ const app = {
 
     // Adding a new message to chat history
     addMessage(message) {
-      message.date = new Date(message.date).toLocaleString();
+      message.date = new Date(message.date).toUTCString();
 
       const msg = `<li>
                     <div class="message-data">
