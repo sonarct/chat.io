@@ -33,13 +33,6 @@ var findOrCreate = function(data, callback){
 				picture: data.photos[0].value || null
 			};
 
-			// To avoid expired Facebook CDN URLs
-			// Request user's profile picture using user id 
-			// @see http://stackoverflow.com/a/34593933/6649553
-			if(data.provider == "facebook" && userData.picture){
-				userData.picture = "http://graph.facebook.com/" + data.id + "/picture?type=large";
-			}
-
 			create(userData, function(err, newUser){
 				callback(err, newUser);
 			});

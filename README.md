@@ -24,7 +24,6 @@ Check [Demo](http://chatio.herokuapp.com/)
 + Manages Sessions using [express-session](https://github.com/expressjs/session) package.
 + Authenticates via username and password using [Passport](https://github.com/jaredhanson/passport).
 + Passwords are hashed using [bcrypt-nodejs](https://github.com/shaneGirish/bcrypt-nodejs) package.
-+ Social Authentication via Facebook and Twitter using [Passport](https://github.com/jaredhanson/passport).
 + Real-time communication between a client and a server using [Socket.io](https://github.com/socketio/socket.io).
 + Uses [MongoDB](https://github.com/mongodb/mongo), [Mongoose](https://github.com/Automattic/mongoose) and [MongoLab(mLab)](https://mlab.com/) for storing and querying data.
 + Stores session in a [MongoDB](https://github.com/mongodb/mongo) using [connect-mongo](https://github.com/kcbanner/connect-mongo); a MongoDB-based session store.
@@ -78,7 +77,7 @@ Make sure you have the [Heroku Toolbelt](https://toolbelt.heroku.com/) installed
 	1. Go to Settings -> Reveal Config Vars.
 	2. Add configuration variables. All needed variables are inside _app/config/index.js_. 
 	Typically, these are the configuration variables you need to assign: 
-	```{ dbURI, sessionSecret, facebookClientID, facebookClientSecret, twitterConsumerKey, twitterConsumerSecret }```(see [Setup Configurations](#configurations)).
+	```{ dbURI, sessionSecret }```(see [Setup Configurations](#configurations)).
 
 3. One last step is to add [Redis](http://redis.io/) as an Add-on on Heroku.
 	1. Go to Resources -> Add-ons
@@ -98,31 +97,6 @@ The configurations on production will be assigned from Environment Variables on 
 
 #### MongoDB & MongoLab
 You need to create a database on MongoLab, then create a database user, get the `MongoDB URI`, and assign it to `dbURI`.
-
-#### Facebook & Twitter
-You need to register a new application on both Facebook and Twitter to get your tokens by which users can grant access to your application, and login using their social accounts.
-
-##### Registering the app on Facebook
-1. Go to [Facebook Developers](https://developers.facebook.com/)
-2. Add new app, and fill the required information.
-3. Get your `App ID`, `App Secret`.
-4. Go to Add Product -> Facebook Login -> Valid OAuth redirect URIs
-5. Add Valid Callback URIs
-6. Go to App Review -> Make your application public.
-
-Now, you can assign the `App ID` to `facebookClientID`, and `App Secret` to `facebookClientSecret`.
-##### Registering the app on Twitter
-1. Go to [Twitter Apps](https://apps.twitter.com/)
-2. Create new app, and fill the required information.
-3. Add Website & Callback URL
-4. Get your `Consumer Key`, `Consumer Secret`.
-
-Now, you can assign the `Consumer Key` to `twitterConsumerKey`, and `Consumer Secret` to `twitterConsumerSecret`.
-
-##### The Callback URL
-- It can point back to your localhost; _[http://localhost:3000/auth/facebook/callback](http://localhost:3000/auth/facebook/callback)_
-
-- When deploy to Heroku, you will have something look like this; _[http://my-chat-app.herokuapp.com/auth/facebook/callback](http://my-chat-app.herokuapp.com/auth/facebook/callback)_
 
 #### Session
 The session needs a random string to make sure the session id in the browser is random. That random string is used to encrypt the session id in the browser, _Why?_ To prevent session id guessing.
