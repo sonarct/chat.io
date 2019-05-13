@@ -3,6 +3,7 @@ const adapter = require('socket.io-redis');
 const config = require('../config');
 
 const Room = require('../models/room');
+const Message = require('../models/message');
 
 /**
  * Encapsulates all code for emitting and listening to socket events
@@ -61,7 +62,7 @@ const ioEvents = function(io) {
             Room.getUsers(newRoom, socket, function(
               err,
               users,
-              cuntUserInRoom,
+              countUserInRoom,
             ) {
               if (err) throw err;
 
@@ -70,7 +71,7 @@ const ioEvents = function(io) {
 
               // Return the current user to other connecting sockets in the room
               // ONLY if the user wasn't connected already to the current room
-              if (cuntUserInRoom === 1) {
+              if (countUserInRoom === 1) {
                 socket.broadcast
                   .to(newRoom.id)
                   .emit('updateUsersList', users[users.length - 1]);
@@ -90,7 +91,7 @@ const ioEvents = function(io) {
 
       // Find the room to which the socket is connected to,
       // and remove the current user + socket from this room
-      Room.removeUser(socket, function(err, room, userId, cuntUserInRoom) {
+      Room.removeUser(socket, function(err, room, userId, countUserInRoom) {
         if (err) throw err;
 
         // Leave the room channel
@@ -98,7 +99,7 @@ const ioEvents = function(io) {
 
         // Return the user id ONLY if the user was connected to the current room using one socket
         // The user id will be then used to remove the user from users list on chatroom page
-        if (cuntUserInRoom === 1) {
+        if (countUserInRoom === 1) {
           socket.broadcast.to(room.id).emit('removeUser', userId);
         }
       });
@@ -109,8 +110,19 @@ const ioEvents = function(io) {
       // No need to emit 'addMessage' to the current socket
       // As the new message will be added manually in 'main.js' file
       // socket.emit('addMessage', message);
+      console.log('new message');
 
-      socket.broadcast.to(roomId).emit('addMessage', message);
+      const msg = {
+        content: message.content,
+        room: roomId,
+        author: message.username,
+        date: new Date(message.date),
+      };
+      console.log('msg', JSON.stringify(msg));
+      Message.create(msg, () => {
+        console.log('new message created success');
+        socket.broadcast.to(roomId).emit('addMessage', message);
+      });
     });
   });
 };

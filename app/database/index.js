@@ -9,6 +9,7 @@ const dbURI = `mongodb://${encodeURIComponent(
 )}:${encodeURIComponent(config.db.password)}@${config.db.host}:${
   config.db.port
 }/${config.db.name}`;
+
 Mongoose.connect(dbURI, { useNewUrlParser: true });
 
 // Throw an error if the connection fails
@@ -26,5 +27,6 @@ module.exports = {
   models: {
     user: require('./schemas/user.js'),
     room: require('./schemas/room.js'),
+    message: require('./schemas/message.js'),
   },
 };

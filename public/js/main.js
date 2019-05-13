@@ -1,4 +1,4 @@
-var app = {
+const app = {
   rooms() {
     const socket = io('/rooms', { transports: ['websocket'] });
 
